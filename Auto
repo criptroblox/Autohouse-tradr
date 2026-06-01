@@ -1,35 +1,42 @@
--- Создание GUI с авто-отправкой
+-- Создание GUI
 local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ChatSender"
 ScreenGui.Parent = game.CoreGui
 
+-- Главная рамка (увеличена для новых элементов)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 350, 0, 280)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -140)
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 300, 0, 260)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -130)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
+-- Закругление углов
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
 
 -- Заголовок
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Name = "Title"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 10)
 Title.BackgroundTransparency = 1
 Title.Text = "Auto Chat Sender"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 20
+Title.TextSize = 18
 Title.Font = Enum.Font.GothamBold
 Title.Parent = MainFrame
 
--- Поле ввода текста
+-- Поле ввода сообщения
 local TextBox = Instance.new("TextBox")
-TextBox.Size = UDim2.new(0.9, 0, 0, 45)
-TextBox.Position = UDim2.new(0.05, 0, 0, 45)
-TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TextBox.Name = "TextBox"
+TextBox.Size = UDim2.new(0.9, 0, 0, 35)
+TextBox.Position = UDim2.new(0.05, 0, 0, 50)
+TextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextBox.PlaceholderText = "Введите сообщение..."
 TextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
@@ -43,55 +50,76 @@ TextBoxCorner.CornerRadius = UDim.new(0, 5)
 TextBoxCorner.Parent = TextBox
 
 -- Поле ввода задержки
+local DelayFrame = Instance.new("Frame")
+DelayFrame.Size = UDim2.new(0.9, 0, 0, 35)
+DelayFrame.Position = UDim2.new(0.05, 0, 0, 95)
+DelayFrame.BackgroundTransparency = 1
+DelayFrame.Parent = MainFrame
+
 local DelayLabel = Instance.new("TextLabel")
-DelayLabel.Size = UDim2.new(0.4, 0, 0, 20)
-DelayLabel.Position = UDim2.new(0.05, 0, 0, 100)
+DelayLabel.Size = UDim2.new(0.45, 0, 1, 0)
 DelayLabel.BackgroundTransparency = 1
 DelayLabel.Text = "Задержка (сек):"
 DelayLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 DelayLabel.TextSize = 14
 DelayLabel.Font = Enum.Font.Gotham
-DelayLabel.Parent = MainFrame
+DelayLabel.Parent = DelayFrame
 
 local DelayBox = Instance.new("TextBox")
-DelayBox.Size = UDim2.new(0.4, 0, 0, 30)
-DelayBox.Position = UDim2.new(0.55, 0, 0, 95)
-DelayBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+DelayBox.Name = "DelayBox"
+DelayBox.Size = UDim2.new(0.5, 0, 1, 0)
+DelayBox.Position = UDim2.new(0.5, 0, 0, 0)
+DelayBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 DelayBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-DelayBox.Text = "5"
+DelayBox.PlaceholderText = "10"
+DelayBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+DelayBox.Text = "10"
 DelayBox.TextSize = 16
 DelayBox.Font = Enum.Font.Gotham
 DelayBox.BorderSizePixel = 0
-DelayBox.Parent = MainFrame
+DelayBox.Parent = DelayFrame
 
 local DelayCorner = Instance.new("UICorner")
 DelayCorner.CornerRadius = UDim.new(0, 5)
 DelayCorner.Parent = DelayBox
 
--- Кнопка Старт/Стоп
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(0.4, 0, 0, 40)
-ToggleButton.Position = UDim2.new(0.05, 0, 0, 140)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.Text = "СТАРТ"
-ToggleButton.TextSize = 18
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.BorderSizePixel = 0
-ToggleButton.Parent = MainFrame
+-- Статус авто-отправки
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(0.9, 0, 0, 25)
+StatusLabel.Position = UDim2.new(0.05, 0, 0, 140)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "Статус: Неактивно"
+StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+StatusLabel.TextSize = 14
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.Parent = MainFrame
 
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 5)
-ToggleCorner.Parent = ToggleButton
+-- Кнопка Старт/Стоп авто-отправки
+local StartStopButton = Instance.new("TextButton")
+StartStopButton.Name = "StartStopButton"
+StartStopButton.Size = UDim2.new(0.43, 0, 0, 38)
+StartStopButton.Position = UDim2.new(0.05, 0, 0, 170)
+StartStopButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+StartStopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+StartStopButton.Text = "▶ СТАРТ"
+StartStopButton.TextSize = 16
+StartStopButton.Font = Enum.Font.GothamBold
+StartStopButton.BorderSizePixel = 0
+StartStopButton.Parent = MainFrame
+
+local StartStopCorner = Instance.new("UICorner")
+StartStopCorner.CornerRadius = UDim.new(0, 5)
+StartStopCorner.Parent = StartStopButton
 
 -- Кнопка отправить 1 раз
 local SendOnceButton = Instance.new("TextButton")
-SendOnceButton.Size = UDim2.new(0.4, 0, 0, 40)
-SendOnceButton.Position = UDim2.new(0.55, 0, 0, 140)
+SendOnceButton.Name = "SendOnceButton"
+SendOnceButton.Size = UDim2.new(0.43, 0, 0, 38)
+SendOnceButton.Position = UDim2.new(0.52, 0, 0, 170)
 SendOnceButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 SendOnceButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 SendOnceButton.Text = "Отправить"
-SendOnceButton.TextSize = 18
+SendOnceButton.TextSize = 16
 SendOnceButton.Font = Enum.Font.GothamBold
 SendOnceButton.BorderSizePixel = 0
 SendOnceButton.Parent = MainFrame
@@ -100,25 +128,15 @@ local SendOnceCorner = Instance.new("UICorner")
 SendOnceCorner.CornerRadius = UDim.new(0, 5)
 SendOnceCorner.Parent = SendOnceButton
 
--- Статус
-local StatusLabel = Instance.new("TextLabel")
-StatusLabel.Size = UDim2.new(0.9, 0, 0, 30)
-StatusLabel.Position = UDim2.new(0.05, 0, 0, 195)
-StatusLabel.BackgroundTransparency = 1
-StatusLabel.Text = "Статус: Готов"
-StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-StatusLabel.TextSize = 14
-StatusLabel.Font = Enum.Font.Gotham
-StatusLabel.Parent = MainFrame
-
 -- Кнопка закрытия
 local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
 CloseButton.Size = UDim2.new(0, 30, 0, 30)
 CloseButton.Position = UDim2.new(1, -35, 0, 5)
 CloseButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseButton.Text = "X"
-CloseButton.TextSize = 18
+CloseButton.TextSize = 16
 CloseButton.Font = Enum.Font.GothamBold
 CloseButton.BorderSizePixel = 0
 CloseButton.Parent = MainFrame
@@ -127,84 +145,109 @@ local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(0, 5)
 CloseCorner.Parent = CloseButton
 
--- Переменные
-local isRunning = false
+-- Переменная для управления авто-отправкой
+local autoSendActive = false
 
--- Функция отправки в чат
+-- Функция отправки сообщения в чат
 local function sendToChat(message)
     if message == "" then return false end
     
-    -- Пробуем разные методы
-    local success = pcall(function()
-        local chatEvent = game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents")
-        if chatEvent and chatEvent:FindFirstChild("SayMessageRequest") then
-            chatEvent.SayMessageRequest:FireServer(message, "All")
-            return
-        end
-        
-        local chatRemote = game:GetService("ReplicatedStorage"):FindFirstChild("ChatRemote")
-        if chatRemote then
-            chatRemote:FireServer(message)
-            return
-        end
-        
-        local textChatService = game:GetService("TextChatService")
-        if textChatService.ChatInputBarConfiguration then
-            local generalChannel = textChatService.TextChannels:WaitForChild("RBXGeneral")
-            if generalChannel then
-                generalChannel:SendAsync(message)
-            end
-        end
-    end)
-    
-    return success
-end
-
--- Отправка одного сообщения
-SendOnceButton.MouseButton1Click:Connect(function()
-    local text = TextBox.Text
-    if text ~= "" then
-        if sendToChat(text) then
-            StatusLabel.Text = "Статус: Отправлено!"
-            TextBox.Text = ""
-        else
-            StatusLabel.Text = "Статус: Ошибка отправки!"
+    -- Способ 1: Через DefaultChatSystemChatEvents
+    local chatEvent = game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents")
+    if chatEvent then
+        local sayMessageRequest = chatEvent:FindFirstChild("SayMessageRequest")
+        if sayMessageRequest then
+            sayMessageRequest:FireServer(message, "All")
+            print("Sent: " .. message)
+            return true
         end
     end
-end)
-
--- Авто-отправка
-ToggleButton.MouseButton1Click:Connect(function()
-    isRunning = not isRunning
     
-    if isRunning then
-        ToggleButton.Text = "СТОП"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    -- Способ 2: Через ChatRemote
+    local chatRemote = game:GetService("ReplicatedStorage"):FindFirstChild("ChatRemote")
+    if chatRemote then
+        chatRemote:FireServer(message)
+        print("Sent: " .. message)
+        return true
+    end
+    
+    -- Способ 3: Через TextChatService
+    local textChatService = game:GetService("TextChatService")
+    if textChatService and textChatService.ChatInputBarConfiguration then
+        local textChannels = textChatService:WaitForChild("TextChannels")
+        local generalChannel = textChannels:WaitForChild("RBXGeneral")
+        if generalChannel then
+            generalChannel:SendAsync(message)
+            print("Sent: " .. message)
+            return true
+        end
+    end
+    
+    print("Failed to send message!")
+    return false
+end
+
+-- Обработчик кнопки Старт/Стоп
+StartStopButton.MouseButton1Click:Connect(function()
+    autoSendActive = not autoSendActive
+    
+    if autoSendActive then
+        -- Запускаем авто-отправку
+        StartStopButton.Text = "⏹ СТОП"
+        StartStopButton.BackgroundColor3 = Color3.fromRGB(220, 0, 0)
         StatusLabel.Text = "Статус: Авто-отправка..."
+        StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
         
-        -- Запускаем цикл авто-отправки
+        -- Запускаем цикл в отдельном потоке
         spawn(function()
-            while isRunning do
+            while autoSendActive do
                 local text = TextBox.Text
                 if text ~= "" then
-                    if sendToChat(text) then
-                        StatusLabel.Text = "Статус: Отправлено!"
-                    end
+                    sendToChat(text)
                 end
                 
-                local delay = tonumber(DelayBox.Text) or 5
+                -- Получаем задержку из поля
+                local delay = tonumber(DelayBox.Text) or 10
+                if delay < 1 then delay = 1 end -- Минимальная задержка 1 сек
+                
                 wait(delay)
             end
         end)
     else
-        ToggleButton.Text = "СТАРТ"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+        -- Останавливаем авто-отправку
+        StartStopButton.Text = "▶ СТАРТ"
+        StartStopButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
         StatusLabel.Text = "Статус: Остановлено"
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
     end
 end)
 
--- Закрытие
+-- Обработчик кнопки Отправить 1 раз
+SendOnceButton.MouseButton1Click:Connect(function()
+    local text = TextBox.Text
+    if text ~= "" then
+        sendToChat(text)
+        StatusLabel.Text = "Статус: Отправлено 1 раз"
+        StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+    end
+end)
+
+-- Отправка по Enter в поле сообщения
+TextBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local text = TextBox.Text
+        if text ~= "" then
+            sendToChat(text)
+            StatusLabel.Text = "Статус: Отправлено 1 раз"
+            StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        end
+    end
+end)
+
+-- Закрытие окна (останавливает авто-отправку)
 CloseButton.MouseButton1Click:Connect(function()
-    isRunning = false
+    autoSendActive = false
     ScreenGui:Destroy()
 end)
+
+print("Auto Chat Sender GUI loaded! Drag the window to move it.")
