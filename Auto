@@ -1,38 +1,23 @@
--- Очищаем консоль для читаемости логов
-console.clear()
+-- Очищаем консоль (для эксплоитов)
+rconsoleclear() -- или console.clear() зависит от вашего эксплоита
 
--- Функция отправки сообщения в чат (исправленная)
+-- Функция отправки сообщения в чат
 local function sendChatMessage(msg)
-    local players = game:GetService("Players")
-    local player = players.LocalPlayer
-    
-    -- Способ 1: Через TextChatService (новый API Roblox)
-    local textChatService = game:GetService("TextChatService")
-    if textChatService.ChatInputBarConfiguration then
-        local textChannels = textChatService:WaitForChild("TextChannels")
-        local generalChannel = textChannels:WaitForChild("RBXGeneral")
-        if generalChannel then
-            generalChannel:SendAsync(msg)
-            print("Message sent via TextChatService: " .. msg)
-            return
-        end
-    end
-    
-    -- Способ 2: Через ReplicatedStorage (старый чат)
+    -- Способ для эксплоитов: через ReplicatedStorage
     local replicatedStorage = game:GetService("ReplicatedStorage")
     
-    -- Вариант 2.1: Стандартный путь в большинстве игр
+    -- Пробуем найти DefaultChatSystemChatEvents
     local chatEvent = replicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
     if chatEvent then
         local sayMessageRequest = chatEvent:FindFirstChild("SayMessageRequest")
         if sayMessageRequest then
             sayMessageRequest:FireServer(msg, "All")
-            print("Message sent via DefaultChatSystemChatEvents: " .. msg)
+            print("Message sent: " .. msg)
             return
         end
     end
     
-    -- Вариант 2.2: Альтернативный путь
+    -- Альтернативный способ через ChatRemote
     local chatRemote = replicatedStorage:FindFirstChild("ChatRemote")
     if chatRemote then
         chatRemote:FireServer(msg)
@@ -40,79 +25,41 @@ local function sendChatMessage(msg)
         return
     end
     
-    -- Способ 3: Эмуляция нажатия клавиш (медленный, но надёжный)
-    local virtualInputManager = game:GetService("VirtualInputManager")
-    
-    -- Открываем чат
-    virtualInputManager:SendKeyEvent(true, "Slash", false, game)
-    wait(0.1)
-    virtualInputManager:SendKeyEvent(false, "Slash", false, game)
-    wait(0.1)
-    
-    -- Печатаем сообщение
-    for i = 1, #msg do
-        local char = msg:sub(i, i)
-        virtualInputManager:SendTextInputCharacter(char, false, game)
-        wait(0.01)
-    end
-    
-    -- Отправляем сообщение
-    wait(0.1)
-    virtualInputManager:SendKeyEvent(true, "Return", false, game)
-    wait(0.1)
-    virtualInputManager:SendKeyEvent(false, "Return", false, game)
-    
-    print("Message sent via VirtualInputManager: " .. msg)
+    print("Failed to send message: " .. msg)
 end
 
 -- Функция для установки Magic House Door
 local function placeDoor()
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
-    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     
-    -- Получаем текущую позицию игрока
-    local pos = humanoidRootPart.Position
+    if not character then
+        print("Character not found!")
+        return
+    end
     
-    -- Вычисляем позицию впереди (на 5 блоков вперед по направлению взгляда)
-    local lookVector = humanoidRootPart.CFrame.lookVector
-    local newPos = pos + (lookVector * 5)
-    
-    -- Попытка вызвать предмет из панели инструментов (Backpack)
+    -- Попытка найти дверь в Backpack
     local backpack = player:WaitForChild("Backpack")
     local doorTool = backpack:FindFirstChild("Magic House Door")
     
     if doorTool then
-        -- Активируем предмет (Parent = Character)
+        -- Активируем предмет
         doorTool.Parent = character
-        
-        -- Ждём экипировки
         wait(0.5)
         
-        -- Активируем инструмент (клик)
         local tool = character:FindFirstChild("Magic House Door")
         if tool then
             tool:Activate()
             wait(0.5)
-            tool:Deactivate()
             print("Door placed!")
         end
     else
         print("Magic House Door not found in backpack!")
-        -- Проверяем, может быть уже экипирован
-        local equipped = character:FindFirstChild("Magic House Door")
-        if equipped then
-            equipped:Activate()
-            wait(0.5)
-            equipped:Deactivate()
-            print("Door placed from equipped!")
-        end
     end
 end
 
 -- Функция перемещения к двери
 local function moveToDoor()
-    -- Поиск двери в Workspace
     local door = workspace:FindFirstChild("MagicHouseDoor") 
         or workspace:FindFirstChild("HouseDoor")
         or workspace:FindFirstChild("Door")
@@ -120,14 +67,17 @@ local function moveToDoor()
     if door and door:IsA("BasePart") then
         local player = game.Players.LocalPlayer
         local character = player.Character
-        if character and character:FindFirstChild("Humanoid") then
-            -- Перемещаемся рядом с дверью
-            local targetPos = door.Position + Vector3.new(0, 0, 3)
-            character:SetPrimaryPartCFrame(CFrame.new(targetPos))
-            print("Moved to the door.")
+        
+        if character then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                local targetPos = door.Position + Vector3.new(0, 0, 3)
+                humanoidRootPart.CFrame = CFrame.new(targetPos)
+                print("Moved to the door.")
+            end
         end
     else
-        print("Door not found in workspace to move to.")
+        print("Door not found!")
     end
 end
 
@@ -135,22 +85,19 @@ end
 local i = 0
 while true do
     i = i + 1
-    print("Cycle " .. i .. ": Starting actions...")
+    print("Cycle " .. i .. ": Starting...")
     
     -- 1. Пишем в чат
     sendChatMessage("trade house for good offer")
-    
-    -- Небольшая задержка между действиями
     wait(1)
     
     -- 2. Ставим дверь
     placeDoor()
-    
     wait(1)
     
     -- 3. Перемещаемся к ней
     moveToDoor()
     
-    -- Ждем 10 секунд до следующего цикла
+    -- Ждем 10 секунд
     wait(10)
 end
