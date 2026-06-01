@@ -1,16 +1,68 @@
 -- Очищаем консоль для читаемости логов
-console.clear()  -- Исправлено: console:clear() -> console.clear()
+console.clear()
 
--- Функция отправки сообщения в чат
+-- Функция отправки сообщения в чат (исправленная)
 local function sendChatMessage(msg)
-    -- Способ 1: Через симуляцию нажатия клавиш (самый безопасный, но медленный)
-    -- firesignal(game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"), msg, "All")
+    local players = game:GetService("Players")
+    local player = players.LocalPlayer
     
-    -- Способ 2: Через Remote события (обычно патчатся)
-    -- game:GetService("ReplicatedStorage"):WaitForChild("ChatRemote"):FireServer(msg)
+    -- Способ 1: Через TextChatService (новый API Roblox)
+    local textChatService = game:GetService("TextChatService")
+    if textChatService.ChatInputBarConfiguration then
+        local textChannels = textChatService:WaitForChild("TextChannels")
+        local generalChannel = textChannels:WaitForChild("RBXGeneral")
+        if generalChannel then
+            generalChannel:SendAsync(msg)
+            print("Message sent via TextChatService: " .. msg)
+            return
+        end
+    end
     
-    -- ВАЖНО: Замените путь на тот, который работает в текущей версии игры
-    print("Attempting to send: " .. msg) -- Заглушка, чтобы скрипт не падал
+    -- Способ 2: Через ReplicatedStorage (старый чат)
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    
+    -- Вариант 2.1: Стандартный путь в большинстве игр
+    local chatEvent = replicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+    if chatEvent then
+        local sayMessageRequest = chatEvent:FindFirstChild("SayMessageRequest")
+        if sayMessageRequest then
+            sayMessageRequest:FireServer(msg, "All")
+            print("Message sent via DefaultChatSystemChatEvents: " .. msg)
+            return
+        end
+    end
+    
+    -- Вариант 2.2: Альтернативный путь
+    local chatRemote = replicatedStorage:FindFirstChild("ChatRemote")
+    if chatRemote then
+        chatRemote:FireServer(msg)
+        print("Message sent via ChatRemote: " .. msg)
+        return
+    end
+    
+    -- Способ 3: Эмуляция нажатия клавиш (медленный, но надёжный)
+    local virtualInputManager = game:GetService("VirtualInputManager")
+    
+    -- Открываем чат
+    virtualInputManager:SendKeyEvent(true, "Slash", false, game)
+    wait(0.1)
+    virtualInputManager:SendKeyEvent(false, "Slash", false, game)
+    wait(0.1)
+    
+    -- Печатаем сообщение
+    for i = 1, #msg do
+        local char = msg:sub(i, i)
+        virtualInputManager:SendTextInputCharacter(char, false, game)
+        wait(0.01)
+    end
+    
+    -- Отправляем сообщение
+    wait(0.1)
+    virtualInputManager:SendKeyEvent(true, "Return", false, game)
+    wait(0.1)
+    virtualInputManager:SendKeyEvent(false, "Return", false, game)
+    
+    print("Message sent via VirtualInputManager: " .. msg)
 end
 
 -- Функция для установки Magic House Door
@@ -27,33 +79,49 @@ local function placeDoor()
     local newPos = pos + (lookVector * 5)
     
     -- Попытка вызвать предмет из панели инструментов (Backpack)
-    -- Обычно нужно найти Tool с названием "Magic House Door" и активировать его
     local backpack = player:WaitForChild("Backpack")
     local doorTool = backpack:FindFirstChild("Magic House Door")
     
     if doorTool then
         -- Активируем предмет (Parent = Character)
         doorTool.Parent = character
-        -- Имитируем нажатие (Equip + Use)
-        -- Здесь должен быть вызов удаленного события Equip/Use, точное название неизвестно
-        print("Door tool found, attempting to equip/place...")
+        
+        -- Ждём экипировки
+        wait(0.5)
+        
+        -- Активируем инструмент (клик)
+        local tool = character:FindFirstChild("Magic House Door")
+        if tool then
+            tool:Activate()
+            wait(0.5)
+            tool:Deactivate()
+            print("Door placed!")
+        end
     else
         print("Magic House Door not found in backpack!")
-        -- Если нет в инвентаре, нужно добавить через GUI или инвентарь игры
+        -- Проверяем, может быть уже экипирован
+        local equipped = character:FindFirstChild("Magic House Door")
+        if equipped then
+            equipped:Activate()
+            wait(0.5)
+            equipped:Deactivate()
+            print("Door placed from equipped!")
+        end
     end
 end
 
--- Функция перемещения к двери (становимся рядом)
+-- Функция перемещения к двери
 local function moveToDoor()
-    -- Поиск недавно установленной двери
-    -- Обычно после установки, дверь становится объектом в Workspace
-    local door = workspace:FindFirstChild("MagicHouseDoor") or workspace:FindFirstChild("HouseDoor")
+    -- Поиск двери в Workspace
+    local door = workspace:FindFirstChild("MagicHouseDoor") 
+        or workspace:FindFirstChild("HouseDoor")
+        or workspace:FindFirstChild("Door")
     
     if door and door:IsA("BasePart") then
         local player = game.Players.LocalPlayer
         local character = player.Character
         if character and character:FindFirstChild("Humanoid") then
-            -- Перемещаем HumanoidRootPart к позиции двери + небольшое смещение
+            -- Перемещаемся рядом с дверью
             local targetPos = door.Position + Vector3.new(0, 0, 3)
             character:SetPrimaryPartCFrame(CFrame.new(targetPos))
             print("Moved to the door.")
@@ -70,9 +138,9 @@ while true do
     print("Cycle " .. i .. ": Starting actions...")
     
     -- 1. Пишем в чат
-    sendChatMessage("trade house for good offer") -- Исправлено: "fir" -> "for"
+    sendChatMessage("trade house for good offer")
     
-    -- Небольшая задержка между действиями, чтобы игра успела отреагировать
+    -- Небольшая задержка между действиями
     wait(1)
     
     -- 2. Ставим дверь
