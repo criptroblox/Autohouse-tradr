@@ -1,0 +1,88 @@
+-- Очищаем консоль для читаемости логов
+console.clear()  -- Исправлено: console:clear() -> console.clear()
+
+-- Функция отправки сообщения в чат
+local function sendChatMessage(msg)
+    -- Способ 1: Через симуляцию нажатия клавиш (самый безопасный, но медленный)
+    -- firesignal(game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"), msg, "All")
+    
+    -- Способ 2: Через Remote события (обычно патчатся)
+    -- game:GetService("ReplicatedStorage"):WaitForChild("ChatRemote"):FireServer(msg)
+    
+    -- ВАЖНО: Замените путь на тот, который работает в текущей версии игры
+    print("Attempting to send: " .. msg) -- Заглушка, чтобы скрипт не падал
+end
+
+-- Функция для установки Magic House Door
+local function placeDoor()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    
+    -- Получаем текущую позицию игрока
+    local pos = humanoidRootPart.Position
+    
+    -- Вычисляем позицию впереди (на 5 блоков вперед по направлению взгляда)
+    local lookVector = humanoidRootPart.CFrame.lookVector
+    local newPos = pos + (lookVector * 5)
+    
+    -- Попытка вызвать предмет из панели инструментов (Backpack)
+    -- Обычно нужно найти Tool с названием "Magic House Door" и активировать его
+    local backpack = player:WaitForChild("Backpack")
+    local doorTool = backpack:FindFirstChild("Magic House Door")
+    
+    if doorTool then
+        -- Активируем предмет (Parent = Character)
+        doorTool.Parent = character
+        -- Имитируем нажатие (Equip + Use)
+        -- Здесь должен быть вызов удаленного события Equip/Use, точное название неизвестно
+        print("Door tool found, attempting to equip/place...")
+    else
+        print("Magic House Door not found in backpack!")
+        -- Если нет в инвентаре, нужно добавить через GUI или инвентарь игры
+    end
+end
+
+-- Функция перемещения к двери (становимся рядом)
+local function moveToDoor()
+    -- Поиск недавно установленной двери
+    -- Обычно после установки, дверь становится объектом в Workspace
+    local door = workspace:FindFirstChild("MagicHouseDoor") or workspace:FindFirstChild("HouseDoor")
+    
+    if door and door:IsA("BasePart") then
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") then
+            -- Перемещаем HumanoidRootPart к позиции двери + небольшое смещение
+            local targetPos = door.Position + Vector3.new(0, 0, 3)
+            character:SetPrimaryPartCFrame(CFrame.new(targetPos))
+            print("Moved to the door.")
+        end
+    else
+        print("Door not found in workspace to move to.")
+    end
+end
+
+-- Основной цикл
+local i = 0
+while true do
+    i = i + 1
+    print("Cycle " .. i .. ": Starting actions...")
+    
+    -- 1. Пишем в чат
+    sendChatMessage("trade house for good offer") -- Исправлено: "fir" -> "for"
+    
+    -- Небольшая задержка между действиями, чтобы игра успела отреагировать
+    wait(1)
+    
+    -- 2. Ставим дверь
+    placeDoor()
+    
+    wait(1)
+    
+    -- 3. Перемещаемся к ней
+    moveToDoor()
+    
+    -- Ждем 10 секунд до следующего цикла
+    wait(10)
+end
