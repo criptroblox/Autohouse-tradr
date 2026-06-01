@@ -1,103 +1,152 @@
--- Очищаем консоль (для эксплоитов)
-rconsoleclear() -- или console.clear() зависит от вашего эксплоита
+-- Создание GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ChatSender"
+ScreenGui.Parent = game.CoreGui -- или game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Главная рамка
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 300, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+-- Закругление углов (опционально)
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
+-- Заголовок
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 10)
+Title.BackgroundTransparency = 1
+Title.Text = "Chat Sender"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 18
+Title.Font = Enum.Font.GothamBold
+Title.Parent = MainFrame
+
+-- Поле ввода
+local TextBox = Instance.new("TextBox")
+TextBox.Name = "TextBox"
+TextBox.Size = UDim2.new(0.9, 0, 0, 40)
+TextBox.Position = UDim2.new(0.05, 0, 0, 50)
+TextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.PlaceholderText = "Введите сообщение..."
+TextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+TextBox.TextSize = 16
+TextBox.Font = Enum.Font.Gotham
+TextBox.BorderSizePixel = 0
+TextBox.Parent = MainFrame
+
+-- Закругление для TextBox
+local TextBoxCorner = Instance.new("UICorner")
+TextBoxCorner.CornerRadius = UDim.new(0, 5)
+TextBoxCorner.Parent = TextBox
+
+-- Кнопка отправки
+local SendButton = Instance.new("TextButton")
+SendButton.Name = "SendButton"
+SendButton.Size = UDim2.new(0.9, 0, 0, 40)
+SendButton.Position = UDim2.new(0.05, 0, 0, 100)
+SendButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+SendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SendButton.Text = "Отправить в чат"
+SendButton.TextSize = 16
+SendButton.Font = Enum.Font.GothamBold
+SendButton.BorderSizePixel = 0
+SendButton.Parent = MainFrame
+
+-- Закругление для кнопки
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 5)
+ButtonCorner.Parent = SendButton
+
+-- Кнопка закрытия
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.Text = "X"
+CloseButton.TextSize = 16
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.BorderSizePixel = 0
+CloseButton.Parent = MainFrame
+
+-- Закругление для кнопки закрытия
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 5)
+CloseCorner.Parent = CloseButton
 
 -- Функция отправки сообщения в чат
-local function sendChatMessage(msg)
-    -- Способ для эксплоитов: через ReplicatedStorage
-    local replicatedStorage = game:GetService("ReplicatedStorage")
+local function sendToChat(message)
+    if message == "" then return end
     
-    -- Пробуем найти DefaultChatSystemChatEvents
-    local chatEvent = replicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+    -- Способ 1: Через DefaultChatSystemChatEvents
+    local chatEvent = game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents")
     if chatEvent then
         local sayMessageRequest = chatEvent:FindFirstChild("SayMessageRequest")
         if sayMessageRequest then
-            sayMessageRequest:FireServer(msg, "All")
-            print("Message sent: " .. msg)
+            sayMessageRequest:FireServer(message, "All")
+            print("Sent: " .. message)
             return
         end
     end
     
-    -- Альтернативный способ через ChatRemote
-    local chatRemote = replicatedStorage:FindFirstChild("ChatRemote")
+    -- Способ 2: Через ChatRemote
+    local chatRemote = game:GetService("ReplicatedStorage"):FindFirstChild("ChatRemote")
     if chatRemote then
-        chatRemote:FireServer(msg)
-        print("Message sent via ChatRemote: " .. msg)
+        chatRemote:FireServer(message)
+        print("Sent: " .. message)
         return
     end
     
-    print("Failed to send message: " .. msg)
-end
-
--- Функция для установки Magic House Door
-local function placeDoor()
-    local player = game.Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    
-    if not character then
-        print("Character not found!")
-        return
-    end
-    
-    -- Попытка найти дверь в Backpack
-    local backpack = player:WaitForChild("Backpack")
-    local doorTool = backpack:FindFirstChild("Magic House Door")
-    
-    if doorTool then
-        -- Активируем предмет
-        doorTool.Parent = character
-        wait(0.5)
-        
-        local tool = character:FindFirstChild("Magic House Door")
-        if tool then
-            tool:Activate()
-            wait(0.5)
-            print("Door placed!")
+    -- Способ 3: Через TextChatService
+    local textChatService = game:GetService("TextChatService")
+    if textChatService and textChatService.ChatInputBarConfiguration then
+        local textChannels = textChatService:WaitForChild("TextChannels")
+        local generalChannel = textChannels:WaitForChild("RBXGeneral")
+        if generalChannel then
+            generalChannel:SendAsync(message)
+            print("Sent: " .. message)
+            return
         end
-    else
-        print("Magic House Door not found in backpack!")
     end
+    
+    print("Failed to send message!")
 end
 
--- Функция перемещения к двери
-local function moveToDoor()
-    local door = workspace:FindFirstChild("MagicHouseDoor") 
-        or workspace:FindFirstChild("HouseDoor")
-        or workspace:FindFirstChild("Door")
-    
-    if door and door:IsA("BasePart") then
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        
-        if character then
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart then
-                local targetPos = door.Position + Vector3.new(0, 0, 3)
-                humanoidRootPart.CFrame = CFrame.new(targetPos)
-                print("Moved to the door.")
-            end
+-- Обработчик кнопки Отправить
+SendButton.MouseButton1Click:Connect(function()
+    local text = TextBox.Text
+    if text ~= "" then
+        sendToChat(text)
+        TextBox.Text = "" -- Очищаем поле после отправки
+    end
+end)
+
+-- Отправка по Enter
+TextBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local text = TextBox.Text
+        if text ~= "" then
+            sendToChat(text)
+            TextBox.Text = ""
         end
-    else
-        print("Door not found!")
     end
-end
+end)
 
--- Основной цикл
-local i = 0
-while true do
-    i = i + 1
-    print("Cycle " .. i .. ": Starting...")
-    
-    -- 1. Пишем в чат
-    sendChatMessage("trade house for good offer")
-    wait(1)
-    
-    -- 2. Ставим дверь
-    placeDoor()
-    wait(1)
-    
-    -- 3. Перемещаемся к ней
-    moveToDoor()
-    
-    -- Ждем 10 секунд
-    wait(10)
-end
+-- Закрытие окна
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+print("Chat Sender GUI loaded! Drag the window to move it.")
